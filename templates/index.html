@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigQuery Release Notes Explorer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="header-title-container">
+                <h1>BigQuery Release Notes</h1>
+                <p>Stay up to date with the latest features, improvements, and fixes in Google BigQuery</p>
+            </div>
+            
+            <div class="header-actions">
+                <div class="status-indicator">
+                    <div id="statusDot" class="status-dot"></div>
+                    <span id="statusText">System Ready</span>
+                </div>
+                <button id="btnRefresh" class="btn-refresh" title="Refresh Release Notes">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                    </svg>
+                    Refresh
+                </button>
+            </div>
+        </header>
+
+        <!-- Search and Filters -->
+        <section class="filter-section">
+            <div class="search-wrapper">
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="searchInput" placeholder="Search release notes (e.g. Gemini, SQL, quota)...">
+            </div>
+            
+            <div class="filter-pills">
+                <button class="filter-pill active" data-filter="all">All Updates</button>
+                <button class="filter-pill" data-filter="feature">Features</button>
+                <button class="filter-pill" data-filter="change">Changes</button>
+                <button class="filter-pill" data-filter="issue">Issues</button>
+                <button class="filter-pill" data-filter="deprecation">Deprecations</button>
+            </div>
+        </section>
+
+        <!-- Main Release Notes Area -->
+        <main>
+            <div id="loadingState" class="loading-container" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>Fetching latest release notes from Google Cloud...</p>
+            </div>
+
+            <div id="emptyState" class="empty-container" style="display: none;">
+                <div class="empty-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <h3>No Release Notes Found</h3>
+                <p>Try refreshing or adjusting your search queries / filters.</p>
+            </div>
+
+            <div id="notesGrid" class="notes-grid">
+                <!-- Release note cards will be dynamically injected here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Floating Action Panel (Selected Item Menu) -->
+    <div id="actionPanel" class="action-panel">
+        <div class="action-panel-text">
+            <span id="selectedCount">1</span> update selected
+        </div>
+        <div class="action-panel-btns">
+            <button id="btnActionTweet" class="btn-action-primary">
+                <!-- Twitter SVG -->
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+                Draft Tweet
+            </button>
+            <button id="btnActionClear" class="btn-action-secondary">Clear Selection</button>
+        </div>
+    </div>
+
+    <!-- Slide-over Tweet Editor Drawer -->
+    <div id="drawerBackdrop" class="drawer-backdrop"></div>
+    <div id="tweetDrawer" class="tweet-drawer">
+        <div class="drawer-header">
+            <h2>
+                <!-- X / Twitter logo -->
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+                Draft Tweet
+            </h2>
+            <button id="btnCloseDrawer" class="btn-close-drawer">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="drawer-content">
+            <div class="tweet-preview-card">
+                <div class="tweet-profile">
+                    <div class="tweet-avatar">BQ</div>
+                    <div class="tweet-user-info">
+                        <div class="tweet-user-name">BigQuery Updates</div>
+                        <div class="tweet-user-handle">@BigQueryUpdates</div>
+                    </div>
+                </div>
+                <textarea id="tweetTextarea" class="tweet-textarea" placeholder="What's happening?"></textarea>
+                <div class="tweet-footer">
+                    <div id="charCounter" class="char-counter">0 / 280</div>
+                </div>
+            </div>
+            
+            <button id="btnTweetNow" class="btn-tweet-now">
+                Share on X / Twitter
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toastNotification" class="toast">
+        <span id="toastMessage">Success</span>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
