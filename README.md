@@ -55,10 +55,6 @@ A premium, glassmorphic dark-themed web application built using **Python Flask**
    ```bash
    python app.py
    ```
-
-5. **Open Browser**:
-   Visit [http://127.0.0.1:5000](http://127.0.0.1:5000) to view the application.
-
 ---
 
 ## License
