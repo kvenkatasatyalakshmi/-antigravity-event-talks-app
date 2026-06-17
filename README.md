@@ -2,7 +2,6 @@
 
 A premium, glassmorphic dark-themed web application built using **Python Flask** and vanilla **HTML, CSS, and JavaScript** that fetches, parses, and visualizes the latest release notes for Google Cloud BigQuery.
 
-👉 Live Local URL: [http://127.0.0.1:5000](http://127.0.0.1:5000)
 
 ---
 
